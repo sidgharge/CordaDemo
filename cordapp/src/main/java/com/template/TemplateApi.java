@@ -1,6 +1,7 @@
 package com.template;
 
 import javassist.tools.web.BadHttpRequest;
+import net.corda.core.contracts.StateAndRef;
 import net.corda.core.identity.Party;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.messaging.FlowHandle;
@@ -12,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 // This API is accessible from /api/template. The endpoint paths specified below are relative to it.
 @Path("template")
@@ -39,6 +41,13 @@ public class TemplateApi {
     @Produces(MediaType.APPLICATION_JSON)
     public Party me(){
         return myIdentity;
+    }
+
+    @GET
+    @Path("prop")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<StateAndRef<ObjectState>> property(){
+        return rpcOps.vaultQuery(ObjectState.class).getStates();
     }
 
     @GET
