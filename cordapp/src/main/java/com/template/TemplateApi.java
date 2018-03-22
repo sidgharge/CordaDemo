@@ -2,6 +2,7 @@ package com.template;
 
 import javassist.tools.web.BadHttpRequest;
 import net.corda.core.contracts.StateAndRef;
+import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.identity.Party;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.messaging.FlowHandle;
@@ -14,6 +15,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Set;
 
 // This API is accessible from /api/template. The endpoint paths specified below are relative to it.
 @Path("template")
@@ -71,11 +73,20 @@ public class TemplateApi {
     @GET
     @Path("transfer")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response transfer(@QueryParam(value = "name") String name, @QueryParam(value = "party") String party){
+    public Response transfer(@QueryParam(value = "id") String id, @QueryParam(value = "party") String party){
+
         try {
+            UniqueIdentifier linearId = UniqueIdentifier.Companion.fromString(id);
+            Set<Party> counterparties = rpcOps.partiesFromName(party, false);
+
+            if (counterparties.size() != 1){
+                throw new IllegalArgumentException("Party not found...");
+            }
+
             final FlowHandle<SignedTransaction> flowHandle = rpcOps.startFlowDynamic(
-                    IssueObjectFlow.Initiator.class,
-                    name
+                    TransferObjectFlow.Initiator.class,
+                    counterparties.iterator().next(),
+                    linearId
             );
 
             final SignedTransaction result = flowHandle.getReturnValue().get();
