@@ -3,6 +3,7 @@ package com.template;
 import net.corda.core.serialization.SerializationWhitelist;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

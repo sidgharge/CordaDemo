@@ -56,7 +56,25 @@ public class TemplateApi {
     public Response issue(@QueryParam(value = "name") String name){
         try {
             final FlowHandle<SignedTransaction> flowHandle = rpcOps.startFlowDynamic(
-                    TemplateFlow.Initiator.class,
+                    IssueObjectFlow.Initiator.class,
+                    name
+            );
+
+            final SignedTransaction result = flowHandle.getReturnValue().get();
+
+            return Response.status(Response.Status.CREATED).entity(result).build();
+        } catch (Exception e){
+            return Response.status(Response.Status.BAD_REQUEST).entity(e).build();
+        }
+    }
+
+    @GET
+    @Path("transfer")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response transfer(@QueryParam(value = "name") String name, @QueryParam(value = "party") String party){
+        try {
+            final FlowHandle<SignedTransaction> flowHandle = rpcOps.startFlowDynamic(
+                    IssueObjectFlow.Initiator.class,
                     name
             );
 

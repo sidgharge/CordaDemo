@@ -2,7 +2,7 @@ package com.template;
 
 import co.paralleluniverse.fibers.Suspendable;
 import net.corda.core.flows.*;
-import net.corda.core.identity.Party;
+import net.corda.core.serialization.CordaSerializable;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
@@ -61,7 +61,7 @@ public class IssueObjectFlow {
         public SignedTransaction call() throws FlowException {
             //Step 1 Initialisation
             progressTracker.setCurrentStep(INITIALISING);
-            final ObjectState objectState = new ObjectState(getOurIdentity(), this.name);
+            final ObjectState objectState = new ObjectState(getOurIdentity(), getOurIdentity(), this.name);
             List<PublicKey> requiredSigners = new ArrayList<>();
             requiredSigners.add(getOurIdentity().getOwningKey());
 
@@ -80,6 +80,22 @@ public class IssueObjectFlow {
             progressTracker.setCurrentStep(FINALISING);
             return subFlow(new FinalityFlow(signedTransaction, FINALISING.childProgressTracker()));
         }
+    }
+
+    @InitiatedBy(IssueObjectFlow.Initiator.class)
+    public static class Responder extends FlowLogic<Void> {
+        private FlowSession counterpartySession;
+
+        public Responder(FlowSession counterpartySession) {
+            this.counterpartySession = counterpartySession;
+        }
+
+        /**
+         * Define the acceptor's flow logic here.
+         */
+        @Suspendable
+        @Override
+        public Void call() { return null; }
     }
 
 }
