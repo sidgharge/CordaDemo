@@ -76,7 +76,7 @@ public class TransferObjectFlow {
 
             //Step 2 Building
             progressTracker.setCurrentStep(BUILDING);
-            if (inputObject.getBorrower() != getOurIdentity()){
+            if (inputObject.getBorrower().equals(getOurIdentity())){
                 throw new FlowException("Tranfer must be initiated by the owner");
             }
 
@@ -121,7 +121,7 @@ public class TransferObjectFlow {
         }
     }
 
-    @InitiatedBy(IssueObjectFlow.Initiator.class)
+    @InitiatedBy(Initiator.class)
     public static class Responder extends FlowLogic<Void> {
         private FlowSession counterpartySession;
 
