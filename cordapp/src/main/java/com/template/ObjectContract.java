@@ -28,7 +28,10 @@ public class ObjectContract implements Contract {
 
         if (command.getValue() instanceof  Commands.Issue){
             verifyIssue(tx);
-        } else {
+        } else if (command.getValue() instanceof Commands.Transfer) {
+            verifyTransfer(tx);
+        }
+        else {
             throw new IllegalArgumentException("UnSupported command...");
         }
     }
@@ -39,6 +42,16 @@ public class ObjectContract implements Contract {
            req.using("There should be only one output", tx.getOutputs().size() == 1);
            ObjectState state = (ObjectState) tx.getOutput(0);
            //req.using("There should be no lender", state.getLender() == null);
+            return null;
+        });
+    }
+
+    private void verifyTransfer(LedgerTransaction tx){
+        requireThat(req -> {
+            req.using("There should be only one input", tx.getInputs().size() == 1);
+            req.using("There should be only one output", tx.getOutputs().size() == 1);
+            ObjectState state = (ObjectState) tx.getOutput(0);
+            req.using("Lender should not be borrower", !state.getLender().equals(state.getBorrower()));
             return null;
         });
     }

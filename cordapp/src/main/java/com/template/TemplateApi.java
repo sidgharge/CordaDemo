@@ -1,5 +1,6 @@
 package com.template;
 
+import com.template.flow.PurchasePropertyFlow;
 import javassist.tools.web.BadHttpRequest;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.contracts.UniqueIdentifier;
@@ -59,6 +60,24 @@ public class TemplateApi {
         try {
             final FlowHandle<SignedTransaction> flowHandle = rpcOps.startFlowDynamic(
                     IssueObjectFlow.Initiator.class,
+                    name
+            );
+
+            final SignedTransaction result = flowHandle.getReturnValue().get();
+
+            return Response.status(Response.Status.CREATED).entity(result).build();
+        } catch (Exception e){
+            return Response.status(Response.Status.BAD_REQUEST).entity(e).build();
+        }
+    }
+
+    @GET
+    @Path("purchase")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response purchase(@QueryParam(value = "name") String name){
+        try {
+            final FlowHandle<SignedTransaction> flowHandle = rpcOps.startFlowDynamic(
+                    PurchasePropertyFlow.Initiator.class,
                     name
             );
 

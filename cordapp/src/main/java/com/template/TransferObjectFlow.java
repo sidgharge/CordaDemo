@@ -76,7 +76,7 @@ public class TransferObjectFlow {
 
             //Step 2 Building
             progressTracker.setCurrentStep(BUILDING);
-            if (inputObject.getBorrower().equals(getOurIdentity())){
+            if (!inputObject.getBorrower().equals(getOurIdentity())){
                 throw new FlowException("Tranfer must be initiated by the owner");
             }
 
