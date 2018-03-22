@@ -54,6 +54,7 @@ public class PurchasePropertyFlow {
         }
 
         @Override
+        @Suspendable
         public SignedTransaction call() throws FlowException {
             progressTracker.setCurrentStep(INITIALISING);
             final Property property = new Property(getOurIdentity(), name);
@@ -61,7 +62,7 @@ public class PurchasePropertyFlow {
             progressTracker.setCurrentStep(BUILDING);
             final TransactionBuilder txBuilder = new TransactionBuilder(getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0))
                     .addOutputState(property, PropertyContract.PROPERTY_CONTRACT_ID)
-                    .addCommand(new PropertyContract.Commands.Purchase());
+                    .addCommand(new PropertyContract.Commands.Purchase(), getOurIdentity().getOwningKey());
 
             progressTracker.setCurrentStep(SIGNING);
             final SignedTransaction stx = getServiceHub().signInitialTransaction(txBuilder);
@@ -87,6 +88,7 @@ public class PurchasePropertyFlow {
         @Suspendable
         @Override
         public Void call() { return null; }
-    }}
+    }
+}
 
 

@@ -1,6 +1,8 @@
 package com.template;
 
+import com.template.flow.MovePropertyFlow;
 import com.template.flow.PurchasePropertyFlow;
+import com.template.state.Property;
 import javassist.tools.web.BadHttpRequest;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.contracts.UniqueIdentifier;
@@ -54,6 +56,13 @@ public class TemplateApi {
     }
 
     @GET
+    @Path("props")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<StateAndRef<Property>> properties(){
+        return rpcOps.vaultQuery(Property.class).getStates();
+    }
+
+    @GET
     @Path("issue")
     @Produces(MediaType.APPLICATION_JSON)
     public Response issue(@QueryParam(value = "name") String name){
@@ -104,6 +113,33 @@ public class TemplateApi {
 
             final FlowHandle<SignedTransaction> flowHandle = rpcOps.startFlowDynamic(
                     TransferObjectFlow.Initiator.class,
+                    counterparties.iterator().next(),
+                    linearId
+            );
+
+            final SignedTransaction result = flowHandle.getReturnValue().get();
+
+            return Response.status(Response.Status.CREATED).entity(result).build();
+        } catch (Exception e){
+            return Response.status(Response.Status.BAD_REQUEST).entity(e).build();
+        }
+    }
+
+    @GET
+    @Path("transferproperty")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response transferproperty(@QueryParam(value = "id") String id, @QueryParam(value = "party") String party){
+
+        try {
+            UniqueIdentifier linearId = UniqueIdentifier.Companion.fromString(id);
+            Set<Party> counterparties = rpcOps.partiesFromName(party, false);
+
+            if (counterparties.size() != 1){
+                throw new IllegalArgumentException("Party not found...");
+            }
+
+            final FlowHandle<SignedTransaction> flowHandle = rpcOps.startFlowDynamic(
+                    MovePropertyFlow.Initiator.class,
                     counterparties.iterator().next(),
                     linearId
             );
