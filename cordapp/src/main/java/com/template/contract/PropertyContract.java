@@ -30,8 +30,18 @@ public class PropertyContract implements Contract {
         }
     }
 
-    //TODO
     private void verifyMove(LedgerTransaction tx) {
+        requireThat(req -> {
+            List<Property> propertyInputStates = tx.inputsOfType(Property.class);
+            req.using("There must be only one input state...", propertyInputStates.size() == 1);
+
+            List<Property> propertyOutputSTates = tx.outputsOfType(Property.class);
+            req.using("There must be only one output state...", propertyOutputSTates.size() == 1);
+
+            req.using("Buyer and seller must be two different parties...", !propertyInputStates.get(0).getOwner().equals(propertyOutputSTates.get(0).getOwner()));
+
+            return null;
+        });
     }
 
     private void verifyPurchase(LedgerTransaction tx) {
