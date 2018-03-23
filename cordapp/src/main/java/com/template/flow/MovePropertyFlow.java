@@ -122,7 +122,7 @@ public class MovePropertyFlow {
 
 
     @InitiatedBy(Initiator.class)
-    public static class Responder extends FlowLogic<Void> {
+    public static class Responder extends FlowLogic<SignedTransaction> {
         private FlowSession counterpartySession;
 
         public Responder(FlowSession counterpartySession) {
@@ -134,6 +134,14 @@ public class MovePropertyFlow {
          */
         @Suspendable
         @Override
-        public Void call() { return null; }
+        public SignedTransaction call() throws FlowException {
+            SignedTransaction stx = subFlow(new SignTransactionFlow(counterpartySession, SignTransactionFlow.Companion.tracker()) {
+                @Override
+                protected void checkTransaction(SignedTransaction stx) throws FlowException {
+                    //TODO: checking
+                }
+            });
+            return waitForLedgerCommit(stx.getId());
+        }
     }
 }
